@@ -94,6 +94,52 @@ def test_collector_emits_after_dedupe_window_elapsed() -> None:
     assert second is not None
 
 
+def test_collector_emits_when_idle_flag_changes_within_dedupe_window() -> None:
+    snapA = SimpleNamespace(
+        ts=datetime(2026, 3, 7, 12, 0, 0),
+        app="MyApp",
+        window_title="Document",
+        bundle_id="com.example.myapp",
+        is_idle=False,
+    )
 
+    class FakeProvider:
+        current = None
+        def capture(self):
+            return self.current
+
+    provider = FakeProvider()
+    provider.current = snapA
+    svc = CollectorService(provider, CollectorConfig(dedupe_window_seconds=15))
+
+    first = svc.collect_once()
+    assert first is not None
+
+    # keep timestamp within dedupe window but flip is_idle
+    provider.current = SimpleNamespace(**{**snapA.__dict__, "ts": snapA.ts + timedelta(seconds=1), "is_idle": True})
+    second = svc.collect_once()
+    # should emit because is_idle changes fingerprint
+    assert second is not None
+    assert second.id != first.id
+
+def test_collector_dedupes_identical_idle_snapshots() -> None:
+    snap = SimpleNamespace(
+        ts=datetime(2026, 3, 7, 12, 0, 0),
+        app="MyApp",
+        window_title="Document",
+        bundle_id="com.example.myapp",
+        is_idle=True,
+    )
+    class FakeProvider:
+        current = None
+        def capture(self):
+            return self.current
+
+    provider = FakeProvider()
+    provider.current = snap
+    svc = CollectorService(provider, CollectorConfig(dedupe_window_seconds=15))
+    first = svc.collect_once()
+    assert first is not None
+    assert svc.collect_once() is None
 
     
