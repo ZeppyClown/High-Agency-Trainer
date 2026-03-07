@@ -1,0 +1,2 @@
+[console_scripts]
+aical = invasive_ai_calendar.cli:app
