@@ -1,8 +1,11 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron');
 const path = require('path');
 
+let mainWindow;
+let tray;
+
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -18,7 +21,20 @@ app.whenReady().then(() => {
     createWindow();
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+        if (BrowserWindow.getAllWindows().length === 1) createWindow();
+    });
+
+    tray = new Tray(nativeImage.createEmpty());
+    tray.setTitle('Companion');
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'Open', click: () => { if (mainWindow) mainWindow.show(); } },
+        { label: 'Quit', click: () => app.quit() }
+    ]);
+    app.dock.hide();
+    tray.setContextMenu(contextMenu);
+
+    mainWindow.on('blur', () => {
+        mainWindow.hide();
     });
 });
 
