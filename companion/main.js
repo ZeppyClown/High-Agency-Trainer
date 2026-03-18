@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron');
+const { getActiveWindow } = require('./tracker/windowTracker');
 const path = require('path');
 
 let mainWindow;
@@ -36,6 +37,10 @@ app.whenReady().then(() => {
     mainWindow.on('blur', () => {
         mainWindow.hide();
     });
+
+    setInterval(() => {
+        getActiveWindow();
+    }, 10000);
 });
 
 app.on('window-all-closed', function () {
