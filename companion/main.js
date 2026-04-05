@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } = require('electron');
 const { getActiveWindow } = require('./tracker/windowTracker');
+const { insertGoal, getGoal } = require('./db/database');
 const path = require('path');
 
 let mainWindow;
@@ -10,7 +11,9 @@ function createWindow() {
         width: 800,
         height: 600,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false
         }
     });
 
@@ -18,6 +21,16 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
     mainWindow.webContents.openDevTools();
 }
+
+// IPC handlers
+ipcMain.handle('save-goal', (event, goal, descriptionOfGoal, targetDate) => {
+    insertGoal(goal, descriptionOfGoal, targetDate);
+    return { success: true };
+});
+
+ipcMain.handle('get-goal', () => {
+    return getGoal();
+});
 
 app.whenReady().then(() => {
     createWindow();

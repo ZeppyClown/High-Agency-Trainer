@@ -15,7 +15,20 @@ const createTable = () => {
     `).run();
 };
 
+const createGoalTable = () => {
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS goal (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            goal TEXT,
+            description TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            target_date DATETIME
+        )
+    `).run();
+};
+
 createTable();
+createGoalTable();
 
 const insertActivity = (app, title, category, url) => {
     db.prepare(`
@@ -24,10 +37,19 @@ const insertActivity = (app, title, category, url) => {
     `).run(app, title, category, url);
 };
 
-// insertActivity("Google Chrome", "Google", "Work");
+const insertGoal = (goal, description, targetDate) => {
+    db.prepare(`
+        INSERT INTO goal (goal, description, target_date)
+        VALUES (?, ?, ?)
+    `).run(goal, description, targetDate);
+}
 
 const getActivity = () => {
     return db.prepare("SELECT * FROM activity_log").all();
 };
 
-module.exports = { insertActivity, getActivity };
+const getGoal = () => {
+    return db.prepare("SELECT * FROM goal ORDER BY id DESC LIMIT 1").get() || null;
+};
+
+module.exports = { insertActivity, getActivity, insertGoal, getGoal };
