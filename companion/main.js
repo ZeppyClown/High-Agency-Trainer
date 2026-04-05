@@ -16,6 +16,7 @@ function createWindow() {
 
     // Load the index.html from the renderer directory
     mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+    mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
@@ -31,7 +32,7 @@ app.whenReady().then(() => {
         { label: 'Open', click: () => { if (mainWindow) mainWindow.show(); } },
         { label: 'Quit', click: () => app.quit() }
     ]);
-    app.dock.hide();
+    // app.dock.hide();
     tray.setContextMenu(contextMenu);
 
     mainWindow.on('blur', () => {

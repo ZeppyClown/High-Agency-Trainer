@@ -30,3 +30,8 @@ def test_sessionize_splits_on_context_switch() -> None:
     events = [ev(0, "Code", "main.py"), ev(30, "Chrome", "Docs")]
     sessions = sessionize(events, inactivity_seconds=120)
     assert len(sessions) == 2
+
+def test_sessionize_splits_for_inactivity_gap() -> None:
+    events = [ev(0, "Code", "main.py"), ev(30, "Chrome", "Docs")]
+    sessions = sessionize(events, inactivity_seconds=120)
+    
